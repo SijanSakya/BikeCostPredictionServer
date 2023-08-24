@@ -1,0 +1,25 @@
+.{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+.bg-dark{
+    background-color: #75767b;
+    height: 100vh;
+    padding: 20px 60px;
+}
+.mt-50{
+    margin-top: 50px;
+}
+.mt-10{
+    margin-top: 10px;
+}
+
+.card{
+    background-color: white;
+    border: #75767b;
+    border-radius: 1%;
+    padding: 30px 30px;
+    
+}
