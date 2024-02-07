@@ -3,41 +3,55 @@ from flask import Flask
 from flask_cors import CORS
 import pandas as pd
 import joblib
+import pickle
+from joblib import dump, load
+
 
 app = Flask(__name__)
-CORS(app)
-# CORS(app, origins=["http://localhost:3000/"])
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-model = joblib.load("LinearRegressionModel.pkl")
+# with open('LinearRegressionModel_one.pkl', 'rb') as f:
+#     model = pickle.load(f)
+
+model = load("RandomForestModel_one.pkl")
+
+# model = joblib.load("LinearRegressionModel.pkl")
+# model2 =pickle.load(open("LinearRegressionModel.pkl"))
 
 @app.route('/')
 def home():
-    return("hello world");
+    return("hello world")
 
-
-@app.route('/bike-data', methods=['POST'])
-def process_bike_data():
-    form_data = request.get_json()
-    data = request.json
-    print(data)
-
-    # selected_bike = form_data.get('bikeName')
-    # selected_brand = form_data.get('brand')
-    # selected_city = form_data.get('city')
-    # selected_kms_driven = int(form_data.get('kmsDriven'))
-    # selected_age = int(form_data.get('age'))
-    # selected_power = int(form_data.get('power'))
-    # selected_owner = int(form_data.get('owner'))
-
-    # result = f"bikeName:{selected_bike} brand:{selected_brand} kmsDriven:{selected_kms_driven} city:{selected_city} age:{selected_age} power: {selected_power} , owner: {selected_owner} ."
-
-    # input_data = pd.DataFrame([[selected_bike, selected_city, selected_kms_driven, selected_age, selected_power, selected_brand, selected_owner]], columns=['bike_name', 'city', 'kms_driven', 'age', 'power', 'brand', 'owner'])
-    # prediction = model.predict(input_data)
-    # predicted_price = prediction[0]
+@app.route('/bike-data', methods=['POST'])  
+def receive_data():
+    try:
+        data = request.json
+        bikeName = data['bikeName']
+        brand = data['brand']
+        city = data['city']
+        kmsDriven = int(data['kmsDriven'])
+        age = int(data['age'])
+        power = int(data['power'])
+        owner = int(data['owner'])
     
-    # response = {'result': result, 'predicted_price': predicted_price}
+        print(f"Bike Name: {bikeName}")
+        result ={"Bike Name": bikeName ,'Brand' :brand , "City": city , "Kms driven" :kmsDriven,"age": age ,"power":power , "Owner":owner} 
     
-    # return jsonify(response)
+   # Construct the input dataframe
+        predictions = pd.DataFrame([[bikeName, city, kmsDriven, age, power, brand, owner]],
+                                columns=['bike_name', 'city', 'kms_driven', 'age', 'power', 'brand', 'owner'])
+        
+        # Predict using the model
+        prediction = model.predict(predictions)
+      
+        return jsonify(round(float(prediction[0]), 2))
+    
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
+
+
+
